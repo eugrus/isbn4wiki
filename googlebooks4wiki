@@ -12,6 +12,7 @@ title=$(echo $data | jq -r '.items[0].volumeInfo.title')
 author=$(echo $data | jq -r '.items[0].volumeInfo.authors[0]')
 publisher=$(echo $data | jq -r '.items[0].volumeInfo.publisher')
 date=$(echo $data | jq -r '.items[0].volumeInfo.publishedDate')
+year=${date:0:4}
 
 # Template generation
 
@@ -20,7 +21,7 @@ if [[ $lang == "ru" ]]; then
   template="{{Шаблон:Книга
   |название=$title
   |автор=$author
-  |дата=$date
+  |год=$year
   |издательство=$publisher
   |isbn=$isbn
   }}"
