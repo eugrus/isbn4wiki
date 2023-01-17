@@ -18,7 +18,7 @@ year=${date:0:4}
 
 # for ru.wikipedia.org as an option
 if [[ $lang == "ru" ]]; then
-  template="{{Шаблон:Книга
+  template="{{Книга
   |название=$title
   |автор=$author
   |год=$year
