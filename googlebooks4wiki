@@ -24,6 +24,7 @@ if [[ $lang == "ru" ]]; then
   |год=$year
   |издательство=$publisher
   |isbn=$isbn
+  |ref=
   }}"
 # for en.wikipedia.org as a default
 else
@@ -33,6 +34,7 @@ else
   |date=$date
   |publisher=$publisher
   |isbn=$isbn
+  |ref=
   }}"
 fi
 
