@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Pass ISBN and optinally the subdomain of a supported language edition of Wikipedia as command line arguments
+# Pass ISBN and optionally the subdomain of a supported language edition of Wikipedia as command line arguments
 isbn=$1
 lang=$2
 
