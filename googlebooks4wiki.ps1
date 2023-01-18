@@ -10,7 +10,7 @@ $data = Invoke-WebRequest -Uri "https://www.googleapis.com/books/v1/volumes?q=is
 # Data extraction from API response
 $json = $data.Content | ConvertFrom-Json
 $title = $json.items[0].volumeInfo.title
-$authors = $json.items[0].volumeInfo.authors -join ", "
+$author = $json.items[0].volumeInfo.authors -join ", "
 $publisher = $json.items[0].volumeInfo.publisher
 $date = $json.items[0].volumeInfo.publishedDate
 $year = $date.Substring(0,4)
@@ -21,7 +21,7 @@ $year = $date.Substring(0,4)
 if ($lang -eq "ru") {
   $template = "{{Книга
   |название=$title
-  |автор=$authors
+  |автор=$author
   |год=$year
   |издательство=$publisher
   |isbn=$isbn
@@ -32,7 +32,7 @@ if ($lang -eq "ru") {
 else {
   $template = "{{Cite book
   |title=$title
-  |author=$authors
+  |author=$author
   |date=$date
   |publisher=$publisher
   |isbn=$isbn
