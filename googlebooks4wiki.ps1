@@ -27,8 +27,9 @@ if ($lang -eq "ru") {
   |isbn=$isbn
   |ref=
   }}"
+} 
 # for en.wikipedia.org as a default
-} else {
+else {
   $template = "{{Cite book
   |title=$title
   |author=$authors
