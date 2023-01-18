@@ -9,8 +9,7 @@ data=$(curl -s "https://www.googleapis.com/books/v1/volumes?q=isbn:$isbn")
 
 # Data extraction from API response
 title=$(echo $data | jq -r '.items[0].volumeInfo.title')
-author=$(echo $data | jq -r '.items[0].volumeInfo.authors[]' | tr '\n' ", ")
-author=${author:0:-1} # removing the leftover comma
+author=$(echo $data | jq -r '.items[0].volumeInfo.authors | join(", ")')
 publisher=$(echo $data | jq -r '.items[0].volumeInfo.publisher')
 date=$(echo $data | jq -r '.items[0].volumeInfo.publishedDate')
 year=${date:0:4}
