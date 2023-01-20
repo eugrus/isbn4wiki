@@ -39,6 +39,8 @@ else {
 		"  |ref=" + "\n" +
 		"}}";
 }
+	
 navigator.clipboard.writeText(template);
+
 });
 })();
