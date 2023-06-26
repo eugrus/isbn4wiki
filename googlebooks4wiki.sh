@@ -19,6 +19,9 @@ else
   lang="${params["lang"]}"
 fi
   
+# Remove any non-numerical characters from ISBN
+isbn=$(echo "${isbn}" | tr -cd '[:digit:]')
+
 # Use Google Books API to retrieve book information 
 data=$(curl -s "https://www.googleapis.com/books/v1/volumes?q=isbn:$isbn") 
 
