@@ -60,7 +60,11 @@ fi
 year=${date:0:4}
 
 # Format ISBN for output into number groups separated by hyphens
-isbnf=${isbn:0:3}-${isbn:3:1}-${isbn:4:3}-${isbn:7:5}-${isbn:12:1}
+if [ ${#isbn} -eq 13 ]; then
+	isbnf=${isbn:0:3}-${isbn:3:1}-${isbn:4:3}-${isbn:7:5}-${isbn:12:1}
+else
+	isbnf=$isbn
+fi
 
 # Template generation 
 
