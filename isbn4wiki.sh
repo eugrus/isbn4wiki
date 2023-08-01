@@ -63,7 +63,7 @@ year=${date:0:4}
 if [ ${#isbn} -eq 13 ]; then # ISBN-13
 	isbnf=${isbn:0:3}-${isbn:3:1}-${isbn:4:3}-${isbn:7:5}-${isbn:12:1}
 elif [ ${#isbn} -eq 10 ]; then # ISBN-10
-    isbnf=${isbn:0:1}-${isbn:1:4}-${isbn:5:4}-${isbn:9:1}
+	isbnf=${isbn:0:1}-${isbn:1:4}-${isbn:5:4}-${isbn:9:1}
 else
 	isbnf=$isbn
 fi
