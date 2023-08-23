@@ -8,6 +8,7 @@ if [ -t 0 ]; then
 	lang="$2"
 else
 	# Running as a script invoked by a webserver
+ 	echo "Content-Type: text/plain; charset=utf-8" && echo
 	declare -A params
 	IFS='&' read -ra query_params <<< "$QUERY_STRING"
 	for param in "${query_params[@]}"; do
