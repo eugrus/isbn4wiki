@@ -2,6 +2,8 @@
 	
 # Pass ISBN and optionally the subdomain of a supported language edition of Wikipedia as command line arguments or get them from URI when invoked by a webserver
 
+shopt -s globasciiranges
+
 if [ -t 0 ]; then
 	# Running in a terminal
 	isbn="$1"
@@ -21,7 +23,11 @@ else
 fi
 	
 # Remove any non-numerical characters from ISBN
-isbn=$(echo "${isbn}" | tr -cd '[:digit:]')
+isbn=${isbn//%??}
+isbn=${isbn//[^0-9]}
+
+# Sanitize other input
+lang=${lang//[^a-z]}
 
 # Use Google Books API to retrieve book information 
 data=$(curl -s "https://www.googleapis.com/books/v1/volumes?q=isbn:$isbn") 
