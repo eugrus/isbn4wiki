@@ -30,7 +30,7 @@ isbn=${isbn//[^0-9]}
 lang=${lang//[^a-z]}
 
 # Use Google Books API to retrieve book information 
-data=$(curl -s "https://www.googleapis.com/books/v1/volumes?q=isbn:$isbn") 
+data=$(curl -s --max-time 10 --fail  "https://www.googleapis.com/books/v1/volumes?q=isbn:$isbn")
 
 # Data extraction from Google Books API response 
 title=$(echo $data | jq -r '.items[0].volumeInfo.title') 
@@ -40,9 +40,10 @@ date=$(echo $data | jq -r '.items[0].volumeInfo.publishedDate')
 
 # If any data missing in Google Books get it from OpenLibrary
 # info: https://www.youtube.com/watch?v=reN_okp2Gq4&t=504s Mek@archive.org
+#       https://openlibrary.org/dev/docs/api/books
 if [[ $title == "null" || $author == "null" || $publisher == "null" || $date == "null" ]]; then
 
-	data=$(curl -sL "https://openlibrary.org/isbn/$isbn.json") # example: https://openlibrary.org/isbn/9780140328721.json
+	data=$(curl -sL --max-time 10 --fail "https://openlibrary.org/isbn/$isbn.json") # example: https://openlibrary.org/isbn/9780140328721.json
 
 	if jq -e . >/dev/null 2>&1 <<<"$data"; then # only proceed with new data if the answer is JSON (OpenLibrary returns HTML for 404 when no book entry)
 	
@@ -51,7 +52,7 @@ if [[ $title == "null" || $author == "null" || $publisher == "null" || $date == 
 		fi
 
 		if [[ $author == "null" ]]; then
-			author=`curl -s "https://openlibrary.org$(echo $data | jq -r '.authors[]'.key).json" | jq -r '.name'`
+			author=`curl -s --max-time 10 --fail  "https://openlibrary.org$(echo $data | jq -r '.authors[]'.key).json" | jq -r '.name'`
 		fi
 
 		if [[ $publisher == "null" ]]; then
