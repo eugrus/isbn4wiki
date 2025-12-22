@@ -78,8 +78,20 @@ fi
 
 # Template generation 
 
+case "$lang" in
+    de)
+# for de.wikipedia.org as an option
+template="{{Literatur
+|Autor=$author
+|Titel=$title
+|Auflage=
+|Verlag=$publisher
+|Datum=$date
+|ISBN=$isbnf
+}}"
+;;
+    ru)
 # for ru.wikipedia.org as an option 
-if [[ $lang == "ru" ]]; then 
 template="{{Книга 
 |название=$title 
 |автор=$author 
@@ -88,8 +100,9 @@ template="{{Книга
 |isbn=$isbnf
 |ref= 
 }}" 
+;;
+    *)
 # for en.wikipedia.org as a default 
-else 
 template="{{Cite book 
 |title=$title 
 |author=$author 
@@ -98,6 +111,7 @@ template="{{Cite book
 |isbn=$isbnf
 |ref= 
 }}" 
-fi 
+;;
+esac
 
 echo "$template"
