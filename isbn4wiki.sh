@@ -33,10 +33,10 @@ lang=${lang//[^a-z]}
 data=$(curl -s --max-time 10 --fail  "https://www.googleapis.com/books/v1/volumes?q=isbn:$isbn")
 
 # Data extraction from Google Books API response 
-title=$(echo $data | jq -r '.items[0].volumeInfo.title') 
-author=$(echo $data | jq -r '.items[0].volumeInfo.authors | join(", ")') 
-publisher=$(echo $data | jq -r '.items[0].volumeInfo.publisher') 
-date=$(echo $data | jq -r '.items[0].volumeInfo.publishedDate')  
+title=$(<<<"$data" jq -r '.items[0].volumeInfo.title')
+author=$(<<<"$data" jq -r '.items[0].volumeInfo.authors | join(", ")')
+publisher=$(<<<"$data" jq -r '.items[0].volumeInfo.publisher')
+date=$(<<<"$data" jq -r '.items[0].volumeInfo.publishedDate')
 
 # If any data missing in Google Books get it from OpenLibrary
 # info: https://www.youtube.com/watch?v=reN_okp2Gq4&t=504s Mek@archive.org
@@ -48,19 +48,19 @@ if [[ $title == "null" || $author == "null" || $publisher == "null" || $date == 
 	if jq -e . >/dev/null 2>&1 <<<"$data"; then # only proceed with new data if the answer is JSON (OpenLibrary returns HTML for 404 when no book entry)
 	
 		if [[ $title == "null" ]]; then
-			title=`echo $data | jq -r '.title'`
+			title=`<<<"$data" jq -r '.title'`
 		fi
 
 		if [[ $author == "null" ]]; then
-			author=`curl -s --max-time 10 --fail  "https://openlibrary.org$(echo $data | jq -r '.authors[]'.key).json" | jq -r '.name'`
+			author=`curl -s --max-time 10 --fail  "https://openlibrary.org$(<<<"$data" jq -r '.authors[]'.key).json" | jq -r '.name'`
 		fi
 
 		if [[ $publisher == "null" ]]; then
-			publisher=`echo $data | jq -r '.publishers[]'`
+			publisher=`<<<"$data" jq -r '.publishers[]'`
 		fi
 
 		if [[ $date == "null" ]]; then
-			date=$(date -d "`echo $data | jq -r '.publish_date'`" +%Y-%m-%d) # convert into the ISO format from the US format found in the OpenLibrary data
+			date=$(date -d "`<<<"$data" jq -r '.publish_date'`" +%Y-%m-%d) # convert into the ISO format from the US format found in the OpenLibrary data
 		fi
 	fi
 fi
