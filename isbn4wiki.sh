@@ -2,6 +2,8 @@
 	
 # Pass ISBN and optionally the subdomain of a supported language edition of Wikipedia as command line arguments or get them from URI when invoked by a webserver
 
+shopt -s globasciiranges
+
 if [ -t 0 ]; then
 	# Running in a terminal
 	isbn="$1"
@@ -21,39 +23,44 @@ else
 fi
 	
 # Remove any non-numerical characters from ISBN
-isbn=$(echo "${isbn}" | tr -cd '[:digit:]')
+isbn=${isbn//%??}
+isbn=${isbn//[^0-9]}
+
+# Sanitize other input
+lang=${lang//[^a-z]}
 
 # Use Google Books API to retrieve book information 
-data=$(curl -s "https://www.googleapis.com/books/v1/volumes?q=isbn:$isbn") 
+data=$(curl -s --max-time 10 --fail  "https://www.googleapis.com/books/v1/volumes?q=isbn:$isbn")
 
 # Data extraction from Google Books API response 
-title=$(echo $data | jq -r '.items[0].volumeInfo.title') 
-author=$(echo $data | jq -r '.items[0].volumeInfo.authors | join(", ")') 
-publisher=$(echo $data | jq -r '.items[0].volumeInfo.publisher') 
-date=$(echo $data | jq -r '.items[0].volumeInfo.publishedDate')  
+title=$(<<<"$data" jq -r '.items[0].volumeInfo.title')
+author=$(<<<"$data" jq -r '.items[0].volumeInfo.authors | join(", ")')
+publisher=$(<<<"$data" jq -r '.items[0].volumeInfo.publisher')
+date=$(<<<"$data" jq -r '.items[0].volumeInfo.publishedDate')
 
 # If any data missing in Google Books get it from OpenLibrary
 # info: https://www.youtube.com/watch?v=reN_okp2Gq4&t=504s Mek@archive.org
+#       https://openlibrary.org/dev/docs/api/books
 if [[ $title == "null" || $author == "null" || $publisher == "null" || $date == "null" ]]; then
 
-	data=$(curl -sL "https://openlibrary.org/isbn/$isbn.json") # example: https://openlibrary.org/isbn/9780140328721.json
+	data=$(curl -sL --max-time 10 --fail "https://openlibrary.org/isbn/$isbn.json") # example: https://openlibrary.org/isbn/9780140328721.json
 
 	if jq -e . >/dev/null 2>&1 <<<"$data"; then # only proceed with new data if the answer is JSON (OpenLibrary returns HTML for 404 when no book entry)
 	
 		if [[ $title == "null" ]]; then
-			title=`echo $data | jq -r '.title'`
+			title=`<<<"$data" jq -r '.title'`
 		fi
 
 		if [[ $author == "null" ]]; then
-			author=`curl -s "https://openlibrary.org$(echo $data | jq -r '.authors[]'.key).json" | jq -r '.name'`
+			author=`curl -s --max-time 10 --fail  "https://openlibrary.org$(<<<"$data" jq -r '.authors[]'.key).json" | jq -r '.name'`
 		fi
 
 		if [[ $publisher == "null" ]]; then
-			publisher=`echo $data | jq -r '.publishers[]'`
+			publisher=`<<<"$data" jq -r '.publishers[]'`
 		fi
 
 		if [[ $date == "null" ]]; then
-			date=$(date -d "`echo $data | jq -r '.publish_date'`" +%Y-%m-%d) # convert into the ISO format from the US format found in the OpenLibrary data
+			date=$(date -d "`<<<"$data" jq -r '.publish_date'`" +%Y-%m-%d) # convert into the ISO format from the US format found in the OpenLibrary data
 		fi
 	fi
 fi
@@ -71,8 +78,20 @@ fi
 
 # Template generation 
 
+case "$lang" in
+    de)
+# for de.wikipedia.org as an option
+template="{{Literatur
+|Autor=$author
+|Titel=$title
+|Auflage=
+|Verlag=$publisher
+|Datum=$date
+|ISBN=$isbnf
+}}"
+;;
+    ru)
 # for ru.wikipedia.org as an option 
-if [[ $lang == "ru" ]]; then 
 template="{{Книга 
 |название=$title 
 |автор=$author 
@@ -81,8 +100,9 @@ template="{{Книга
 |isbn=$isbnf
 |ref= 
 }}" 
+;;
+    *)
 # for en.wikipedia.org as a default 
-else 
 template="{{Cite book 
 |title=$title 
 |author=$author 
@@ -91,6 +111,7 @@ template="{{Cite book
 |isbn=$isbnf
 |ref= 
 }}" 
-fi 
+;;
+esac
 
 echo "$template"
